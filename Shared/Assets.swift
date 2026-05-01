@@ -44,6 +44,9 @@ struct Assets {
 		static var articleExtractorError: RSImage { RSImage(named: "articleExtractorError")! }
 		static var articleExtractorOn: RSImage { RSImage(named: "articleExtractorOn")! }
 		static var articleExtractorOff: RSImage { RSImage(named: "articleExtractorOff")! }
+		static var translate: RSImage { RSImage(symbol: "translate")! }
+		static var translateSelected: RSImage { RSImage(symbol: "translate.circle.fill") ?? translate }
+		static var translateError: RSImage { RSImage(symbol: "exclamationmark.triangle")! }
 		static var share: RSImage { RSImage(symbol: "square.and.arrow.up")! }
 		static var folder: RSImage { RSImage(symbol: "folder")! }
 		static var starredFeed: IconImage {
@@ -69,6 +72,7 @@ struct Assets {
 		static var preferencesToolbarAccounts: RSImage { RSImage(symbol: "at")! }
 		static var preferencesToolbarGeneral: RSImage { RSImage(symbol: "gearshape")! }
 		static var preferencesToolbarAdvanced: RSImage { RSImage(symbol: "gearshape.2")! }
+		static var preferencesToolbarTranslation: RSImage { RSImage(symbol: "translate")! }
 		static var readClosed: RSImage { RSImage(symbol: "largecircle.fill.circle")! }
 		static var readOpen: RSImage { RSImage(symbol: "circle")! }
 		static var refresh: RSImage { RSImage(symbol: "arrow.clockwise")! }

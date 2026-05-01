@@ -43,6 +43,8 @@ final class AppDefaults: Sendable {
 		static let defaultBrowserID = "defaultBrowserID"
 		static let currentThemeName = "currentThemeName"
 		static let articleContentJavascriptEnabled = "articleContentJavascriptEnabled"
+		static let translationBaseURLString = "translationBaseURLString"
+		static let translationModel = "translationModel"
 
 		// Hidden prefs
 		static let showDebugMenu = "ShowDebugMenu"
@@ -319,6 +321,24 @@ final class AppDefaults: Sendable {
 		}
 	}
 
+	var translationBaseURLString: String {
+		get {
+			AppDefaults.string(for: Key.translationBaseURLString) ?? "https://api.deepseek.com"
+		}
+		set {
+			AppDefaults.setString(for: Key.translationBaseURLString, newValue)
+		}
+	}
+
+	var translationModel: String {
+		get {
+			AppDefaults.string(for: Key.translationModel) ?? "deepseek-v4-flash"
+		}
+		set {
+			AppDefaults.setString(for: Key.translationModel, newValue)
+		}
+	}
+
 	init() {
 		// Migrate every-10-minute refresh interval to 30 minutes.
 		let rawValue = UserDefaults.standard.integer(forKey: Key.refreshInterval)
@@ -344,7 +364,9 @@ final class AppDefaults: Sendable {
 			Key.refreshInterval: RefreshInterval.every2Hours.rawValue,
 			Key.showDebugMenu: showDebugMenu,
 			Key.currentThemeName: Self.defaultThemeName,
-			Key.articleContentJavascriptEnabled: true
+			Key.articleContentJavascriptEnabled: true,
+			Key.translationBaseURLString: "https://api.deepseek.com",
+			Key.translationModel: "deepseek-v4-flash"
 		]
 
 		UserDefaults.standard.register(defaults: defaults)

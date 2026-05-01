@@ -115,6 +115,7 @@ final class MainWindowController: NSWindowController, NSUserInterfaceValidations
 
 		NotificationCenter.default.addObserver(self, selector: #selector(articleThemeNamesDidChangeNotification(_:)), name: .ArticleThemeNamesDidChangeNotification, object: nil)
 		NotificationCenter.default.addObserver(self, selector: #selector(currentArticleThemeDidChangeNotification(_:)), name: .CurrentArticleThemeDidChangeNotification, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(articleTranslationStateDidChange(_:)), name: .ArticleTranslationStateDidChange, object: nil)
 
 		DispatchQueue.main.async {
 			self.updateWindowTitle()
@@ -176,6 +177,10 @@ final class MainWindowController: NSWindowController, NSUserInterfaceValidations
 
 	@objc func coalescedUpdateWindowTitle() {
 		updateWindowTitle()
+	}
+
+	@objc func articleTranslationStateDidChange(_ note: Notification) {
+		makeToolbarValidate()
 	}
 
 	@objc func displayNameDidChange(_ note: Notification) {
@@ -270,6 +275,10 @@ final class MainWindowController: NSWindowController, NSUserInterfaceValidations
 
 		if item.action == #selector(toggleArticleExtractor(_:)) {
 			return validateToggleArticleExtractor(item)
+		}
+
+		if item.action == #selector(toggleArticleTranslation(_:)) {
+			return validateToggleArticleTranslation(item)
 		}
 
 		if item.action == #selector(toolbarShowShareMenu(_:)) {
@@ -460,6 +469,11 @@ final class MainWindowController: NSWindowController, NSUserInterfaceValidations
 			startArticleExtractorForCurrentLink()
 		}
 
+	}
+
+	@IBAction func toggleArticleTranslation(_ sender: Any?) {
+		detailViewController?.toggleArticleTranslation()
+		makeToolbarValidate()
 	}
 
 	@IBAction func markAllAsReadAndGoToNextUnread(_ sender: Any?) {
@@ -789,6 +803,7 @@ extension NSToolbarItem.Identifier {
 	static let markRead = NSToolbarItem.Identifier("markRead")
 	static let markStar = NSToolbarItem.Identifier("markStar")
 	static let readerView = NSToolbarItem.Identifier("readerView")
+	static let translateArticle = NSToolbarItem.Identifier("translateArticle")
 	static let openInBrowser = NSToolbarItem.Identifier("openInBrowser")
 	static let share = NSToolbarItem.Identifier("share")
 	static let articleThemeMenu = NSToolbarItem.Identifier("articleThemeMenu")
@@ -848,6 +863,17 @@ extension MainWindowController: NSToolbarDelegate {
 			toolbarItem.view = button
 			return toolbarItem
 
+		case .translateArticle:
+			let toolbarItem = RSToolbarItem(itemIdentifier: .translateArticle)
+			toolbarItem.autovalidates = true
+			let description = NSLocalizedString("Translate Article", comment: "Translate Article")
+			toolbarItem.toolTip = description
+			toolbarItem.label = description
+			let button = ArticleTranslationButton()
+			button.action = #selector(toggleArticleTranslation(_:))
+			toolbarItem.view = button
+			return toolbarItem
+
 		case .share:
 			let title = NSLocalizedString("Share", comment: "Share")
 			return buildToolbarButton(.share, title, Assets.Images.share, "toolbarShowShareMenu:")
@@ -895,6 +921,7 @@ extension MainWindowController: NSToolbarDelegate {
 			.markRead,
 			.markStar,
 			.readerView,
+			.translateArticle,
 			.openInBrowser,
 			.share,
 			.articleThemeMenu,
@@ -917,6 +944,7 @@ extension MainWindowController: NSToolbarDelegate {
 			.markStar,
 			.nextUnread,
 			.readerView,
+			.translateArticle,
 			.share,
 			.openInBrowser,
 			.flexibleSpace,
@@ -1187,6 +1215,23 @@ private extension MainWindowController {
 		}
 
 		return state != .processing
+	}
+
+	func validateToggleArticleTranslation(_ item: NSValidatedUserInterfaceItem) -> Bool {
+		let buttonState = detailViewController?.articleTranslationButtonState ?? .off
+		let canTranslate = oneSelectedArticle != nil
+
+		if let menuItem = item as? NSMenuItem {
+			menuItem.state = buttonState == .on ? .on : .off
+			return canTranslate && buttonState != .processing
+		}
+
+		guard let toolbarItem = item as? NSToolbarItem, let toolbarButton = toolbarItem.view as? ArticleTranslationButton else {
+			return canTranslate && buttonState != .processing
+		}
+
+		toolbarButton.buttonState = buttonState
+		return canTranslate && buttonState != .processing
 	}
 
 	func canMarkAboveArticlesAsRead() -> Bool {

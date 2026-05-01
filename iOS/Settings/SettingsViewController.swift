@@ -147,7 +147,7 @@ final class SettingsViewController: UITableViewController {
 			}
 			return defaultNumberOfRows
 		case .articles:
-			return traitCollection.userInterfaceIdiom == .phone ? 5 : 4
+			return articleSettingsStaticRowCount + 1
 		case .troubleshooting:
 			let defaultNumberOfRows = super.tableView(tableView, numberOfRowsInSection: section)
 			if !AccountManager.shared.hasiCloudAccount {
@@ -162,6 +162,14 @@ final class SettingsViewController: UITableViewController {
 	override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
 		let cell: UITableViewCell
+		if Section(rawValue: indexPath.section) == .articles, indexPath.row == translationSettingsArticleRow {
+			cell = tableView.dequeueReusableCell(withIdentifier: "SettingsTableViewCell", for: indexPath)
+			cell.textLabel?.text = NSLocalizedString("Translation", comment: "Settings")
+			cell.detailTextLabel?.text = nil
+			cell.accessoryType = .disclosureIndicator
+			return cell
+		}
+
 		switch Section(rawValue: indexPath.section) {
 		case .accounts:
 
@@ -234,6 +242,9 @@ final class SettingsViewController: UITableViewController {
 			case 0:
 				let articleThemes = UIStoryboard.settings.instantiateController(ofType: ArticleThemesTableViewController.self)
 				self.navigationController?.pushViewController(articleThemes, animated: true)
+			case translationSettingsArticleRow:
+				let hostingController = UIHostingController(rootView: ArticleTranslationSettingsView())
+				self.navigationController?.pushViewController(hostingController, animated: true)
 			default:
 				break
 			}
@@ -401,6 +412,14 @@ extension SettingsViewController: UIDocumentPickerDelegate {
 // MARK: - Private
 
 private extension SettingsViewController {
+
+	var articleSettingsStaticRowCount: Int {
+		traitCollection.userInterfaceIdiom == .phone ? 5 : 4
+	}
+
+	var translationSettingsArticleRow: Int {
+		articleSettingsStaticRowCount
+	}
 
 	func addFeed() {
 		self.dismiss(animated: true)

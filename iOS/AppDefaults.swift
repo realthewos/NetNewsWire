@@ -77,6 +77,8 @@ final class AppDefaults: Sendable {
 		static let selectedArticle = "selectedArticle"
 		static let didMigrateLegacyStateRestorationInfo = "didMigrateLegacyStateRestorationInfo"
 		static let splitViewPreferredDisplayMode = "splitViewPreferredDisplayMode"
+		static let translationBaseURLString = "translationBaseURLString"
+		static let translationModel = "translationModel"
 	}
 
 	let isDeveloperBuild: Bool = {
@@ -387,6 +389,24 @@ final class AppDefaults: Sendable {
 		}
 	}
 
+	var translationBaseURLString: String {
+		get {
+			AppDefaults.store.string(forKey: Key.translationBaseURLString) ?? "https://api.deepseek.com"
+		}
+		set {
+			AppDefaults.store.set(newValue, forKey: Key.translationBaseURLString)
+		}
+	}
+
+	var translationModel: String {
+		get {
+			AppDefaults.store.string(forKey: Key.translationModel) ?? "deepseek-v4-flash"
+		}
+		set {
+			AppDefaults.store.set(newValue, forKey: Key.translationModel)
+		}
+	}
+
 	@MainActor static func registerDefaults() {
 		let defaults: [String: Any] = [Key.userInterfaceColorPalette: UserInterfaceColorPalette.automatic.rawValue,
 										Key.timelineGroupByFeed: false,
@@ -399,7 +419,9 @@ final class AppDefaults: Sendable {
 										Key.confirmMarkAllAsRead: true,
 										Key.articleContentJavascriptEnabled: true,
 										Key.currentThemeName: Self.defaultThemeName,
-									   Key.splitViewPreferredDisplayMode: UISplitViewController.DisplayMode.oneBesideSecondary.rawValue]
+										Key.splitViewPreferredDisplayMode: UISplitViewController.DisplayMode.oneBesideSecondary.rawValue,
+										Key.translationBaseURLString: "https://api.deepseek.com",
+										Key.translationModel: "deepseek-v4-flash"]
 		AppDefaults.store.register(defaults: defaults)
 	}
 }

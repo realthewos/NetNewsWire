@@ -26,6 +26,29 @@
 .x-netnewswire-hide {
 	display: none;
 }
+
+.articleTitleTranslation:empty {
+	display: none;
+}
+
+.articleTitleTranslation {
+	margin-top: -0.2em;
+	margin-bottom: 0.8em;
+	line-height: 1.45em;
+	opacity: 0.72;
+}
+
+.nnw-translation {
+	margin-top: -0.5em;
+	margin-bottom: 1em;
+	line-height: 1.45em;
+	opacity: 0.72;
+}
+
+li > .nnw-translation {
+	margin-top: 0.25em;
+	margin-bottom: 0.5em;
+}
  
 /*Block ads and junk*/
 

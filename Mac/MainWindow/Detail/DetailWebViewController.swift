@@ -11,6 +11,7 @@ import AppKit
 import RSCore
 import RSWeb
 import Articles
+import ArticleTranslation
 
 @MainActor protocol DetailWebViewControllerDelegate: AnyObject {
 	func mouseDidEnter(_: DetailWebViewController, link: String)
@@ -24,6 +25,9 @@ final class DetailWebViewController: NSViewController {
 	var state: DetailState = .noSelection {
 		didSet {
 			if state != oldValue {
+				if articleTranslationSourceKey(for: state) != articleTranslationSourceKey(for: oldValue) {
+					clearArticleTranslationState()
+				}
 				switch state {
 				case .article(_, let scrollY), .extracted(_, _, let scrollY):
 					windowScrollY = scrollY
@@ -50,6 +54,26 @@ final class DetailWebViewController: NSViewController {
 		}
 	}
 
+	var articleTranslationButtonState: ArticleTranslationButtonState {
+		if isArticleTranslationProcessing {
+			return .processing
+		}
+
+		guard let sourceKey = currentArticleTranslationSourceKey() else {
+			return .off
+		}
+
+		if articleTranslationFailedSourceKey == sourceKey {
+			return .error
+		}
+
+		if articleTranslationSourceKey == sourceKey, articleTranslations != nil {
+			return .on
+		}
+
+		return .off
+	}
+
 	private var articleTextSize = AppDefaults.shared.articleTextSize
 
 	private var webInspectorEnabled: Bool {
@@ -65,6 +89,12 @@ final class DetailWebViewController: NSViewController {
 	private var waitingForFirstReload = false
 	private let keyboardDelegate = DetailKeyboardDelegate()
 	private var windowScrollY: CGFloat?
+	private let articleTranslationService = ArticleTranslationService()
+	private var articleTranslationTask: Task<Void, Never>?
+	private var articleTranslationSourceKey: String?
+	private var articleTranslations: [String: String]?
+	private var articleTranslationFailedSourceKey: String?
+	private var isArticleTranslationProcessing = false
 
 	private var isShowingExtractedArticle: Bool {
 		switch state {
@@ -150,6 +180,93 @@ final class DetailWebViewController: NSViewController {
 
 	func stopMediaPlayback() {
 		webView.evaluateJavaScript("stopMediaPlayback();")
+	}
+
+	func toggleArticleTranslation() {
+		guard let preparedTranslation = currentPreparedArticleTranslation(), !preparedTranslation.segments.isEmpty else {
+			return
+		}
+
+		let sourceKey = ArticleTranslationRendering.sourceKey(
+			articleID: preparedTranslation.articleID,
+			sourceHash: preparedTranslation.sourceHash
+		)
+
+		if isArticleTranslationProcessing {
+			articleTranslationTask?.cancel()
+			clearArticleTranslationState()
+			return
+		}
+
+		if articleTranslationSourceKey == sourceKey, articleTranslations != nil {
+			clearArticleTranslationState()
+			reloadHTMLMaintainingScrollPosition()
+			return
+		}
+
+		let configuration: TranslationConfiguration
+		do {
+			configuration = try ArticleTranslationConfigurationProvider.configuration()
+		} catch {
+			articleTranslationFailedSourceKey = sourceKey
+			notifyArticleTranslationStateDidChange()
+			presentTranslationError(error)
+			return
+		}
+
+		isArticleTranslationProcessing = true
+		articleTranslationSourceKey = sourceKey
+		articleTranslationFailedSourceKey = nil
+		articleTranslations = nil
+		notifyArticleTranslationStateDidChange()
+
+		let service = articleTranslationService
+		articleTranslationTask = Task { [weak self, service] in
+			do {
+				let translations = try await service.translate(
+					articleID: preparedTranslation.articleID,
+					sourceHash: preparedTranslation.sourceHash,
+					sourceTextForDirectionDetection: preparedTranslation.sourceTextForDirectionDetection,
+					segments: preparedTranslation.segments,
+					configuration: configuration
+				)
+
+				try Task.checkCancellation()
+
+				await MainActor.run {
+					guard let self, self.currentArticleTranslationSourceKey() == sourceKey else {
+						return
+					}
+
+					self.isArticleTranslationProcessing = false
+					self.articleTranslationTask = nil
+					self.articleTranslationSourceKey = sourceKey
+					self.articleTranslations = translations
+					self.articleTranslationFailedSourceKey = nil
+					self.reloadHTMLMaintainingScrollPosition()
+					self.notifyArticleTranslationStateDidChange()
+				}
+			} catch is CancellationError {
+				await MainActor.run {
+					self?.isArticleTranslationProcessing = false
+					self?.articleTranslationTask = nil
+					self?.notifyArticleTranslationStateDidChange()
+				}
+			} catch {
+				await MainActor.run {
+					guard let self, self.currentArticleTranslationSourceKey() == sourceKey else {
+						return
+					}
+
+					self.isArticleTranslationProcessing = false
+					self.articleTranslationTask = nil
+					self.articleTranslations = nil
+					self.articleTranslationFailedSourceKey = sourceKey
+					self.notifyArticleTranslationStateDidChange()
+					self.presentTranslationError(error)
+				}
+			}
+		}
 	}
 
 	// MARK: Scrolling
@@ -290,10 +407,10 @@ private extension DetailWebViewController {
 			rendering = ArticleRenderer.loadingHTML(theme: theme)
 		case .article(let article, _):
 			detailIconSchemeHandler.currentArticle = article
-			rendering = ArticleRenderer.articleHTML(article: article, theme: theme)
+			rendering = ArticleRenderer.articleHTML(article: article, theme: theme, translations: translations(for: article))
 		case .extracted(let article, let extractedArticle, _):
 			detailIconSchemeHandler.currentArticle = article
-			rendering = ArticleRenderer.articleHTML(article: article, extractedArticle: extractedArticle, theme: theme)
+			rendering = ArticleRenderer.articleHTML(article: article, extractedArticle: extractedArticle, theme: theme, translations: translations(for: article, extractedArticle: extractedArticle))
 		}
 
 		let substitutions = [
@@ -337,6 +454,69 @@ private extension DetailWebViewController {
 
 	@objc func webInspectorEnabledDidChange(_ notification: Notification) {
 		self.webInspectorEnabled = notification.object! as! Bool
+	}
+
+	func currentPreparedArticleTranslation() -> PreparedArticleTranslation? {
+		switch state {
+		case .article(let article, _):
+			return ArticleTranslationRendering.prepare(article: article)
+		case .extracted(let article, let extractedArticle, _):
+			return ArticleTranslationRendering.prepare(article: article, extractedArticle: extractedArticle)
+		default:
+			return nil
+		}
+	}
+
+	func currentArticleTranslationSourceKey() -> String? {
+		articleTranslationSourceKey(for: state)
+	}
+
+	func articleTranslationSourceKey(for state: DetailState) -> String? {
+		let preparedTranslation: PreparedArticleTranslation
+		switch state {
+		case .article(let article, _):
+			preparedTranslation = ArticleTranslationRendering.prepare(article: article)
+		case .extracted(let article, let extractedArticle, _):
+			preparedTranslation = ArticleTranslationRendering.prepare(article: article, extractedArticle: extractedArticle)
+		default:
+			return nil
+		}
+		return ArticleTranslationRendering.sourceKey(articleID: preparedTranslation.articleID, sourceHash: preparedTranslation.sourceHash)
+	}
+
+	func translations(for article: Article, extractedArticle: ExtractedArticle? = nil) -> [String: String]? {
+		let sourceKey = ArticleTranslationRendering.sourceKey(article: article, extractedArticle: extractedArticle)
+		guard articleTranslationSourceKey == sourceKey else {
+			return nil
+		}
+		return articleTranslations
+	}
+
+	func clearArticleTranslationState() {
+		articleTranslationTask?.cancel()
+		articleTranslationTask = nil
+		articleTranslations = nil
+		articleTranslationSourceKey = nil
+		articleTranslationFailedSourceKey = nil
+		isArticleTranslationProcessing = false
+		notifyArticleTranslationStateDidChange()
+	}
+
+	func notifyArticleTranslationStateDidChange() {
+		NotificationCenter.default.postOnMainThread(name: .ArticleTranslationStateDidChange, object: self)
+	}
+
+	func presentTranslationError(_ error: Error) {
+		let alert = NSAlert()
+		alert.alertStyle = .warning
+		alert.messageText = NSLocalizedString("Article Translation Failed", comment: "Article Translation Failed")
+		alert.informativeText = error.localizedDescription
+		alert.addButton(withTitle: NSLocalizedString("OK", comment: "OK"))
+		if let window = view.window ?? NSApp.keyWindow {
+			alert.beginSheetModal(for: window) { _ in }
+		} else {
+			alert.runModal()
+		}
 	}
 }
 

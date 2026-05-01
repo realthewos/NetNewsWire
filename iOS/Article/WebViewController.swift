@@ -14,9 +14,11 @@ import Account
 import Articles
 import SafariServices
 import MessageUI
+import ArticleTranslation
 
 @MainActor protocol WebViewControllerDelegate: AnyObject {
 	func webViewController(_: WebViewController, articleExtractorButtonStateDidUpdate: ArticleExtractorButtonState)
+	func webViewController(_: WebViewController, articleTranslationButtonStateDidUpdate: ArticleTranslationButtonState)
 }
 
 final class WebViewController: UIViewController {
@@ -64,10 +66,22 @@ final class WebViewController: UIViewController {
 		}
 	}
 
+	var articleTranslationButtonState: ArticleTranslationButtonState = .off {
+		didSet {
+			delegate?.webViewController(self, articleTranslationButtonStateDidUpdate: articleTranslationButtonState)
+		}
+	}
+
 	weak var coordinator: SceneCoordinator!
 	weak var delegate: WebViewControllerDelegate?
 
 	private(set) var article: Article?
+	private let articleTranslationService = ArticleTranslationService()
+	private var articleTranslationTask: Task<Void, Never>?
+	private var articleTranslationSourceKey: String?
+	private var articleTranslations: [String: String]?
+	private var articleTranslationFailedSourceKey: String?
+	private var isArticleTranslationProcessing = false
 
 	let scrollPositionQueue = CoalescingQueue(name: "Article Scroll Position", interval: 0.3, maxInterval: 0.3)
 	var windowScrollY = 0 {
@@ -131,6 +145,7 @@ final class WebViewController: UIViewController {
 		stopArticleExtractor()
 
 		if article != self.article {
+			clearArticleTranslationState()
 			self.article = article
 			if updateView {
 				if article?.feed?.readerViewAlwaysEnabled == true {
@@ -269,6 +284,93 @@ final class WebViewController: UIViewController {
 			startArticleExtractor()
 		}
 
+	}
+
+	func toggleArticleTranslation() {
+		guard let preparedTranslation = currentPreparedArticleTranslation(), !preparedTranslation.segments.isEmpty else {
+			return
+		}
+
+		let sourceKey = ArticleTranslationRendering.sourceKey(
+			articleID: preparedTranslation.articleID,
+			sourceHash: preparedTranslation.sourceHash
+		)
+
+		if isArticleTranslationProcessing {
+			clearArticleTranslationState()
+			loadWebView()
+			return
+		}
+
+		if articleTranslationSourceKey == sourceKey, articleTranslations != nil {
+			clearArticleTranslationState()
+			loadWebView()
+			return
+		}
+
+		let configuration: TranslationConfiguration
+		do {
+			configuration = try ArticleTranslationConfigurationProvider.configuration()
+		} catch {
+			articleTranslationFailedSourceKey = sourceKey
+			updateArticleTranslationButtonState()
+			presentTranslationError(error)
+			return
+		}
+
+		isArticleTranslationProcessing = true
+		articleTranslationSourceKey = sourceKey
+		articleTranslationFailedSourceKey = nil
+		articleTranslations = nil
+		updateArticleTranslationButtonState()
+
+		let service = articleTranslationService
+		articleTranslationTask = Task { [weak self, service] in
+			do {
+				let translations = try await service.translate(
+					articleID: preparedTranslation.articleID,
+					sourceHash: preparedTranslation.sourceHash,
+					sourceTextForDirectionDetection: preparedTranslation.sourceTextForDirectionDetection,
+					segments: preparedTranslation.segments,
+					configuration: configuration
+				)
+
+				try Task.checkCancellation()
+
+				await MainActor.run {
+					guard let self, self.currentArticleTranslationSourceKey() == sourceKey else {
+						return
+					}
+
+					self.isArticleTranslationProcessing = false
+					self.articleTranslationTask = nil
+					self.articleTranslationSourceKey = sourceKey
+					self.articleTranslations = translations
+					self.articleTranslationFailedSourceKey = nil
+					self.updateArticleTranslationButtonState()
+					self.loadWebView()
+				}
+			} catch is CancellationError {
+				await MainActor.run {
+					self?.isArticleTranslationProcessing = false
+					self?.articleTranslationTask = nil
+					self?.updateArticleTranslationButtonState()
+				}
+			} catch {
+				await MainActor.run {
+					guard let self, self.currentArticleTranslationSourceKey() == sourceKey else {
+						return
+					}
+
+					self.isArticleTranslationProcessing = false
+					self.articleTranslationTask = nil
+					self.articleTranslations = nil
+					self.articleTranslationFailedSourceKey = sourceKey
+					self.updateArticleTranslationButtonState()
+					self.presentTranslationError(error)
+				}
+			}
+		}
 	}
 
 	func stopArticleExtractorIfProcessing() {
@@ -586,6 +688,7 @@ private extension WebViewController {
 
 	func renderPage(_ webView: PreloadedWebView?) {
 		guard let webView = webView else { return }
+		updateArticleTranslationButtonState()
 
 		let theme = ArticleThemesManager.shared.currentTheme
 		let rendering: ArticleRenderer.Rendering
@@ -593,15 +696,15 @@ private extension WebViewController {
 		if let articleExtractor = articleExtractor, articleExtractor.state == .processing {
 			rendering = ArticleRenderer.loadingHTML(theme: theme)
 		} else if let articleExtractor = articleExtractor, articleExtractor.state == .failedToParse, let article = article {
-			rendering = ArticleRenderer.articleHTML(article: article, theme: theme)
+			rendering = ArticleRenderer.articleHTML(article: article, theme: theme, translations: translations(for: article))
 		} else if let article = article, let extractedArticle = extractedArticle {
 			if isShowingExtractedArticle {
-				rendering = ArticleRenderer.articleHTML(article: article, extractedArticle: extractedArticle, theme: theme)
+				rendering = ArticleRenderer.articleHTML(article: article, extractedArticle: extractedArticle, theme: theme, translations: translations(for: article, extractedArticle: extractedArticle))
 			} else {
-				rendering = ArticleRenderer.articleHTML(article: article, theme: theme)
+				rendering = ArticleRenderer.articleHTML(article: article, theme: theme, translations: translations(for: article))
 			}
 		} else if let article = article {
-			rendering = ArticleRenderer.articleHTML(article: article, theme: theme)
+			rendering = ArticleRenderer.articleHTML(article: article, theme: theme, translations: translations(for: article))
 		} else {
 			rendering = ArticleRenderer.noSelectionHTML(theme: theme)
 		}
@@ -652,6 +755,7 @@ private extension WebViewController {
 		articleExtractor = nil
 		isShowingExtractedArticle = false
 		articleExtractorButtonState = .off
+		updateArticleTranslationButtonState()
 	}
 
 	func reloadArticleImage() {
@@ -683,6 +787,70 @@ private extension WebViewController {
 			}
 			self.showFullScreenImage(image: image, clickMessage: clickMessage, webView: webView)
 		}
+	}
+
+	func currentPreparedArticleTranslation() -> PreparedArticleTranslation? {
+		guard let article else {
+			return nil
+		}
+
+		if isShowingExtractedArticle, let extractedArticle {
+			return ArticleTranslationRendering.prepare(article: article, extractedArticle: extractedArticle)
+		}
+
+		return ArticleTranslationRendering.prepare(article: article)
+	}
+
+	func currentArticleTranslationSourceKey() -> String? {
+		guard let preparedTranslation = currentPreparedArticleTranslation() else {
+			return nil
+		}
+		return ArticleTranslationRendering.sourceKey(articleID: preparedTranslation.articleID, sourceHash: preparedTranslation.sourceHash)
+	}
+
+	func translations(for article: Article, extractedArticle: ExtractedArticle? = nil) -> [String: String]? {
+		let sourceKey = ArticleTranslationRendering.sourceKey(article: article, extractedArticle: extractedArticle)
+		guard articleTranslationSourceKey == sourceKey else {
+			return nil
+		}
+		return articleTranslations
+	}
+
+	func clearArticleTranslationState() {
+		articleTranslationTask?.cancel()
+		articleTranslationTask = nil
+		articleTranslationSourceKey = nil
+		articleTranslations = nil
+		articleTranslationFailedSourceKey = nil
+		isArticleTranslationProcessing = false
+		updateArticleTranslationButtonState()
+	}
+
+	func updateArticleTranslationButtonState() {
+		let nextState: ArticleTranslationButtonState
+		if isArticleTranslationProcessing {
+			nextState = .processing
+		} else if let sourceKey = currentArticleTranslationSourceKey(), articleTranslationFailedSourceKey == sourceKey {
+			nextState = .error
+		} else if let sourceKey = currentArticleTranslationSourceKey(), articleTranslationSourceKey == sourceKey, articleTranslations != nil {
+			nextState = .on
+		} else {
+			nextState = .off
+		}
+
+		if articleTranslationButtonState != nextState {
+			articleTranslationButtonState = nextState
+		}
+	}
+
+	func presentTranslationError(_ error: Error) {
+		let alert = UIAlertController(
+			title: NSLocalizedString("Article Translation Failed", comment: "Article Translation Failed"),
+			message: error.localizedDescription,
+			preferredStyle: .alert
+		)
+		alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "OK"), style: .default))
+		present(alert, animated: true)
 	}
 
 	private func showFullScreenImage(image: UIImage, clickMessage: ImageClickMessage, webView: WKWebView) {

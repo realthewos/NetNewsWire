@@ -39,6 +39,7 @@ import Account
 	private let extractedArticle: ExtractedArticle?
 	private let articleTheme: ArticleTheme
 	private let title: String
+	private let titleTranslation: String
 	private let body: String
 	private let baseURL: String?
 
@@ -105,24 +106,30 @@ import Account
 		return formatter
 	}()
 
-	private init(article: Article?, extractedArticle: ExtractedArticle?, theme: ArticleTheme) {
+	private init(article: Article?, extractedArticle: ExtractedArticle?, theme: ArticleTheme, translations: [String: String]? = nil) {
 		self.article = article
 		self.extractedArticle = extractedArticle
 		self.articleTheme = theme
 		self.title = ArticleStringFormatter.sanitizedTitle(article?.title, forHTML: true) ?? ""
+		if let article, let titleSegmentID = ArticleTranslationRendering.titleSegmentID(for: article), let titleTranslation = translations?[titleSegmentID] {
+			self.titleTranslation = titleTranslation.escapedHTML
+		} else {
+			self.titleTranslation = ""
+		}
 		if let content = extractedArticle?.content {
-			self.body = content
+			self.body = ArticleTranslationRendering.htmlByAddingTranslations(to: content, translations: translations ?? [:])
 			self.baseURL = extractedArticle?.url
 		} else {
-			self.body = article?.body ?? ""
+			let articleBody = article?.body ?? ""
+			self.body = ArticleTranslationRendering.htmlByAddingTranslations(to: articleBody, translations: translations ?? [:])
 			self.baseURL = article?.baseURL?.absoluteString
 		}
 	}
 
 	// MARK: - API
 
-	static func articleHTML(article: Article, extractedArticle: ExtractedArticle? = nil, theme: ArticleTheme) -> Rendering {
-		let renderer = ArticleRenderer(article: article, extractedArticle: extractedArticle, theme: theme)
+	static func articleHTML(article: Article, extractedArticle: ExtractedArticle? = nil, theme: ArticleTheme, translations: [String: String]? = nil) -> Rendering {
+		let renderer = ArticleRenderer(article: article, extractedArticle: extractedArticle, theme: theme, translations: translations)
 		return (renderer.articleCSS, renderer.articleHTML, renderer.title, renderer.baseURL ?? "")
 	}
 
@@ -207,6 +214,7 @@ private extension ArticleRenderer {
 		}
 
 		d["title"] = title
+		d["title_translation"] = titleTranslation
 		d["preferred_link"] = article.preferredLink ?? ""
 
 		if let externalLink = article.externalLink, externalLink != article.preferredLink {

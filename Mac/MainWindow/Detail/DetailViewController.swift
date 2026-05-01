@@ -32,6 +32,10 @@ final class DetailViewController: NSViewController, WKUIDelegate {
 		currentWebViewController.windowState
 	}
 
+	var articleTranslationButtonState: ArticleTranslationButtonState {
+		currentWebViewController.articleTranslationButtonState
+	}
+
 	private var currentWebViewController: DetailWebViewController! {
 		didSet {
 			let webview = currentWebViewController.view
@@ -89,6 +93,10 @@ final class DetailViewController: NSViewController, WKUIDelegate {
 
 	func stopMediaPlayback() {
 		currentWebViewController.stopMediaPlayback()
+	}
+
+	func toggleArticleTranslation() {
+		currentWebViewController.toggleArticleTranslation()
 	}
 
 	func canScrollDown() async -> Bool {
