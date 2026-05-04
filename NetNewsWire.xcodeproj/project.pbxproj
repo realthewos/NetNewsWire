@@ -54,10 +54,6 @@
 		843E2F1A2CF2B8C500ED170F /* RSWeb in Frameworks */ = {isa = PBXBuildFile; productRef = 843E2F192CF2B8C500ED170F /* RSWeb */; };
 		843E2F1B2CF2B8C500ED170F /* RSWeb in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 843E2F192CF2B8C500ED170F /* RSWeb */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		843E2F1D2CF2B8D300ED170F /* RSWeb in Frameworks */ = {isa = PBXBuildFile; productRef = 843E2F1C2CF2B8D300ED170F /* RSWeb */; };
-		84A000022E98A00000000002 /* ArticleTranslation in Frameworks */ = {isa = PBXBuildFile; productRef = 84A000012E98A00000000001 /* ArticleTranslation */; };
-		84A000032E98A00000000003 /* ArticleTranslation in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 84A000012E98A00000000001 /* ArticleTranslation */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		84A000052E98A00000000005 /* ArticleTranslation in Frameworks */ = {isa = PBXBuildFile; productRef = 84A000042E98A00000000004 /* ArticleTranslation */; };
-		84A000062E98A00000000006 /* ArticleTranslation in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 84A000042E98A00000000004 /* ArticleTranslation */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		848E84CD2DB749440023F3BA /* RSCore in Frameworks */ = {isa = PBXBuildFile; productRef = 848E84CC2DB749440023F3BA /* RSCore */; };
 		848E84CE2DB749440023F3BA /* RSCore in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 848E84CC2DB749440023F3BA /* RSCore */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		848E84D02DB749440023F3BA /* RSCoreResources in Frameworks */ = {isa = PBXBuildFile; productRef = 848E84CF2DB749440023F3BA /* RSCoreResources */; };
@@ -68,6 +64,10 @@
 		848E84D82DB749720023F3BA /* RSCore in Frameworks */ = {isa = PBXBuildFile; productRef = 848E84D72DB749720023F3BA /* RSCore */; };
 		848E84DB2DB749860023F3BA /* RSCore in Frameworks */ = {isa = PBXBuildFile; productRef = 848E84DA2DB749860023F3BA /* RSCore */; };
 		848E84DF2DB749A40023F3BA /* RSCore in Frameworks */ = {isa = PBXBuildFile; productRef = 848E84DE2DB749A40023F3BA /* RSCore */; };
+		84A000022E98A00000000002 /* ArticleTranslation in Frameworks */ = {isa = PBXBuildFile; productRef = 84A000012E98A00000000001 /* ArticleTranslation */; };
+		84A000032E98A00000000003 /* ArticleTranslation in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 84A000012E98A00000000001 /* ArticleTranslation */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		84A000052E98A00000000005 /* ArticleTranslation in Frameworks */ = {isa = PBXBuildFile; productRef = 84A000042E98A00000000004 /* ArticleTranslation */; };
+		84A000062E98A00000000006 /* ArticleTranslation in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 84A000042E98A00000000004 /* ArticleTranslation */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		84EE3F122DB8A088009D3A8D /* RSTree in Frameworks */ = {isa = PBXBuildFile; productRef = 84EE3F112DB8A088009D3A8D /* RSTree */; };
 		84EE3F132DB8A088009D3A8D /* RSTree in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 84EE3F112DB8A088009D3A8D /* RSTree */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		84EE3F152DB8A0A0009D3A8D /* RSTree in Frameworks */ = {isa = PBXBuildFile; productRef = 84EE3F142DB8A0A0009D3A8D /* RSTree */; };
@@ -513,7 +513,7 @@
 		84719F372DB9C60400EEF332 /* xcconfig */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (84719F392DB9C60500EEF332 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (common, ); path = xcconfig; sourceTree = "<group>"; };
 		84A6CFB52D1B4EC500F23315 /* iOS */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (84A6D03F2D1B4EC500F23315 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 84A6D0402D1B4EC500F23315 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 84A6D0412D1B4EC500F23315 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = iOS; sourceTree = "<group>"; };
 		84CB35042DB9B5E2002AC251 /* Modules */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Modules; sourceTree = "<group>"; };
-		84D35D422DB9F32D004AA60E /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (84D35E0A2DB9F32D004AA60E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 84D35E0B2DB9F32D004AA60E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 84D35E0C2DB9F32D004AA60E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 84D35E0D2DB9F32D004AA60E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 84D35E0E2DB9F32D004AA60E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 84D35E0F2DB9F32D004AA60E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = ("Resources/Appanoose.nnwtheme", "Resources/Biblioteca.nnwtheme", "Resources/Hyperlegible.nnwtheme", "Resources/NewsFax.nnwtheme", "Resources/Promenade.nnwtheme", "Resources/Sepia.nnwtheme", "Resources/Tiqoe Dark.nnwtheme", "Resources/Verdana Revival.nnwtheme", ); path = Shared; sourceTree = "<group>"; };
+		84D35D422DB9F32D004AA60E /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (84D35E0A2DB9F32D004AA60E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 84D35E0B2DB9F32D004AA60E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 84D35E0C2DB9F32D004AA60E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 84D35E0D2DB9F32D004AA60E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 84D35E0E2DB9F32D004AA60E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 84D35E0F2DB9F32D004AA60E /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Shared; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -941,28 +941,23 @@
 					};
 					51314636235A7BBE00387FDC = {
 						CreatedOnToolsVersion = 11.2;
-						DevelopmentTeam = SHJK2V3AJG;
 						LastSwiftMigration = 1120;
 						ProvisioningStyle = Automatic;
 					};
 					513C5CE5232571C2003D4054 = {
 						CreatedOnToolsVersion = 11.0;
-						DevelopmentTeam = SHJK2V3AJG;
 						ProvisioningStyle = Automatic;
 					};
 					518B2ED12351B3DD00400001 = {
 						CreatedOnToolsVersion = 11.2;
-						DevelopmentTeam = SHJK2V3AJG;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 840D617B2029031C009BC708;
 					};
 					6581C73220CED60000F4AD34 = {
-						DevelopmentTeam = SHJK2V3AJG;
 						ProvisioningStyle = Automatic;
 					};
 					840D617B2029031C009BC708 = {
 						CreatedOnToolsVersion = 9.3;
-						DevelopmentTeam = SHJK2V3AJG;
 						LastSwiftMigration = 1250;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
@@ -973,9 +968,7 @@
 					};
 					849C645F1ED37A5D003D8FC0 = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = SHJK2V3AJG;
 						LastSwiftMigration = 1620;
-						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.HardenedRuntime = {
 								enabled = 1;
@@ -984,7 +977,6 @@
 					};
 					849C64701ED37A5D003D8FC0 = {
 						CreatedOnToolsVersion = 8.2.1;
-						DevelopmentTeam = SHJK2V3AJG;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 849C645F1ED37A5D003D8FC0;
 					};
@@ -1362,6 +1354,7 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_iOSwidgetextension_target.xcconfig;
 			buildSettings = {
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Debug;
 		};
@@ -1370,6 +1363,7 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_iOSwidgetextension_target.xcconfig;
 			buildSettings = {
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Release;
 		};
@@ -1378,6 +1372,11 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_shareextension_target.xcconfig;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = JJX73WRMP8;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
@@ -1386,6 +1385,8 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_shareextension_target.xcconfig;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Release;
 		};
@@ -1394,6 +1395,7 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_iOSintentextension_target.xcconfig;
 			buildSettings = {
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Debug;
 		};
@@ -1402,6 +1404,7 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_iOSintentextension_target.xcconfig;
 			buildSettings = {
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Release;
 		};
@@ -1410,6 +1413,7 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_iOSshareextension_target.xcconfig;
 			buildSettings = {
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Debug;
 		};
@@ -1418,6 +1422,7 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_iOSshareextension_target.xcconfig;
 			buildSettings = {
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Release;
 		};
@@ -1426,6 +1431,7 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_iOSTests_target.xcconfig;
 			buildSettings = {
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Debug;
 		};
@@ -1434,6 +1440,7 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_iOSTests_target.xcconfig;
 			buildSettings = {
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Release;
 		};
@@ -1442,6 +1449,8 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_safariextension_target.xcconfig;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Debug;
 		};
@@ -1450,6 +1459,8 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_safariextension_target.xcconfig;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Release;
 		};
@@ -1458,6 +1469,7 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_iOSapp_target.xcconfig;
 			buildSettings = {
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Debug;
 		};
@@ -1466,6 +1478,7 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_iOSapp_target.xcconfig;
 			buildSettings = {
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Release;
 		};
@@ -1490,6 +1503,11 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_macapp_target.xcconfig;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = JJX73WRMP8;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
@@ -1498,6 +1516,11 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWire_macapp_target.xcconfig;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = JJX73WRMP8;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};
@@ -1506,6 +1529,8 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWireTests_target.xcconfig;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Debug;
 		};
@@ -1514,6 +1539,8 @@
 			baseConfigurationReferenceAnchor = 84719F372DB9C60400EEF332 /* xcconfig */;
 			baseConfigurationReferenceRelativePath = NetNewsWireTests_target.xcconfig;
 			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				DEVELOPMENT_TEAM = JJX73WRMP8;
 			};
 			name = Release;
 		};
@@ -1740,14 +1767,6 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = RSWeb;
 		};
-		84A000012E98A00000000001 /* ArticleTranslation */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = ArticleTranslation;
-		};
-		84A000042E98A00000000004 /* ArticleTranslation */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = ArticleTranslation;
-		};
 		848E84CC2DB749440023F3BA /* RSCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RSCore;
@@ -1775,6 +1794,14 @@
 		848E84DE2DB749A40023F3BA /* RSCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RSCore;
+		};
+		84A000012E98A00000000001 /* ArticleTranslation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ArticleTranslation;
+		};
+		84A000042E98A00000000004 /* ArticleTranslation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = ArticleTranslation;
 		};
 		84EE3F112DB8A088009D3A8D /* RSTree */ = {
 			isa = XCSwiftPackageProductDependency;
